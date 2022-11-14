@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>index</title>
+    <!-- 步骤1：引入echarts.js文件 -->
+    <script src="./js/echarts4_8_0.min.js"></script>
+    <!-- 
+    步骤1：引入echarts.js文件
+    步骤2：准备一个呈现图表的盒子
+    步骤3：初始化echarts实例对象
+    步骤4：准备配置项
+    步骤5：将配置项设置给echarts实例对象
+    -->
+</head>
+
+<body>
+    <!-- 步骤2：准备一个呈现图表的盒子 -->
+    <div style="width:1200px;height:600px"></div>
+    <script>
+        // 步骤3：初始化echarts实例对象
+        // 参数, dom,决定图表最终呈现的位置
+        var mCharts = echarts.init(document.querySelector('div'))
+        var CPUUsage = 27.1, MemoryUsage = 17.0, DiskUsage = 22.5, NetworkUsage = 0.3;
+        // 步骤4：准备配置项
+        var data = [
+            {
+                name: "CPU",
+                value: CPUUsage,
+            },
+            {
+                name: "Memory",
+                value: MemoryUsage,
+            },
+            {
+                name: "Disk",
+                value: DiskUsage,
+            },
+            {
+                name: "Network",
+                value: NetworkUsage,
+            },
+        ];
+
+        var titleArr = [], seriesArr = [];
+        //定义四组圆环颜色
+        colors = [
+            ["#389af4", "#dfeaff"],
+            ["#ffc257", "#ffedcc"],
+            ["#fd6f97", "#fed4e0"],
+            ["#a181fc", "#e3d9fe"],
+        ];
+        data.forEach(function (item, index) {
+            //设置标题属性
+            titleArr.push({
+                text: item.name,
+                left: index * 25 + 10 + "%",
+                top: "65%",
+                textAlign: "center",
+                textStyle: {
+                    fontWeight: "normal",
+                    fontSize: "16",
+                    color: colors[index][0],
+                    textAlign: "center",
+                },
+            });
+            //画外圈圆
+            seriesArr.push({
+                name: item.name,
+                type: "pie",
+                clockWise: false,
+                radius: [60, 70],
+                itemStyle: {
+                    normal: {
+                        color: colors[index][0],
+                        shadowColor: colors[index][0],
+                        shadowBlur: 0,
+                        label: {
+                            show: false,
+                        },
+                        labelLine: {
+                            show: false,
+                        },
+                    },
+                },
+                //鼠标放到圆环上的果冻效果
+                hoverAnimation: true,
+                //四等分，index*(100/等分份数）+10
+                center: [index * 25 + 10 + "%", "50%"],
+                //外圈深色色环（占用）
+                data: [
+                    {
+                        value: item.value,
+                        label: {
+                            normal: {
+                                formatter: function (params) {
+                                    return params.value + "%";
+                                },
+                                position: "center",
+                                show: true,
+                                textStyle: {
+                                    fontSize: "20",
+                                    fontWeight: "bold",
+                                    color: colors[index][0],
+                                },
+                            },
+                        },
+                    },
+                    //绘制浅色区域，内容不可见
+                    {
+                        value: 100 - item.value,
+                        name: "invisible",
+                        itemStyle: {
+                            normal: {
+                                color: colors[index][1],
+                            },
+                            emphasis: {
+                                color: colors[index][1],
+                            },
+                        },
+                    },
+                ],
+            });
+        });
+
+        option = {
+            backgroundColor: "#fff",//背景色：白
+            title: titleArr,//显示圆环的名称栏
+            series: seriesArr,//显示圆环
+            //工具箱组件
+            toolbox: {
+                feature: {
+                    //保存图表为图片
+                    saveAsImage: {}
+                }
+            },
+        };
+
+        // 步骤5：将配置项设置给echarts实例对象
+        //5个步骤除了option需要自己配置其他都是固定步骤 配置option参考echart官网！！！
+        mCharts.setOption(option)
+    </script>
+</body>
+
+</html>
