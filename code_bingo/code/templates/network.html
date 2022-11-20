@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Awesome-pyecharts</title>
+    <link rel="stylesheet" href="https://unpkg.com/mdui@1.0.2/dist/css/mdui.min.css" />
+    <script src="https://unpkg.com/mdui@1.0.2/dist/js/mdui.min.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.0.0/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="https://assets.pyecharts.org/assets/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+    <!--导入Chart-->
+    <link rel="stylesheet" type="text/css" href="../css/1.css" />
+
+    <script>
+        $(function () {
+            var can = $('#panel3').get(0).getContext('2d'); /*绘制类型*/
+            //定义图标的数据
+            var canData = {
+                labels: [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "], /*初始x轴数据*/
+                datasets: [
+                    {
+                        //折线的填充颜色
+                        fillColor: "rgba(100, 150 ,0, 0.3)",
+                        //线条颜色：
+                        strokeColor: "white",
+                        //y轴初始数据：
+                        data: ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0']
+                    }
+                ]
+            };
+            //绘制图片
+            var line = new Chart(can).Line(canData);
+            var int = setInterval(function () {  //设置定时器
+                $.ajax(
+                    {
+                        url: "/setData2/", //从setData函数中获取数据
+                        type: "get",
+                        data: "",
+                        success: function (data) {
+                            line.addData(
+                                [data["data"]], //y轴，因为同一个x轴可以有多个折线
+                                data["time"]  //x轴
+                            );
+                        
+                            //保持x轴只有8个数据，要不随着时间推移x轴会越来越长
+                            var len = line.datasets[0].points.length;
+                            if (len > 20) {
+                                line.removeData()
+                            }
+                        }
+                    }
+                )
+            }, 1000)
+        })
+    </script>
+
+</head>
+
+<body style="background-color: rgb(181, 255, 250);">
+    <div id="container">
+        <div id="header" style="height:50px; background-color: blue; margin-bottom: 8px;">
+
+        </div>
+        <div id="nav" style="height:80px;  background-color: #ccffcc; margin-bottom: 8px;">
+            <span style="float:right;color: red;"> <label for="">DESKTOP-5GTCQEM</label> </span>
+        </div>
+        <div id="maincontent">
+
+            <div id="side" style="float: left;width:190px; height: 600px; background-color: #ffcc99;">
+
+                <div><button class=".btn"
+                        style="width:150px;height: 80px;position: relative;top:20px;left: 20px ;">CPU</button></div>
+                <div><button style="width:150px;height: 80px;position: relative;top:50px;left: 20px ;"
+                        onclick="window.location.href='memUsage.html'">内存</button></div>
+                <div><button
+                        style="width:150px;height: 80px;position: relative;top:80px;left: 20px ;"
+                        onclick="window.location.href='index.html'">磁盘</button>
+                </div>
+                <div><button style="width:150px;height: 80px;position: relative;top:110px;left: 20px ;background-color: aqua;"
+                        onclick="window.location.href='network.html'">网络</button>
+                </div>
+            </div>
+
+            <div id="main" style="float: left;width:1130px; height: 600px; background-color: #ffff99;">
+                <div>Bytes Total/sec</div>
+                <canvas id="panel3" height="300px" width="500px"> </canvas>
+            </div>
+            <div id="side01" style="float: right;width:190px; height: 600px; background-color: #ffcc99;">
+                <label for="">错误信息</label>
+
+            </div>
+        </div>
+        <div id="" class="clearfloat">
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

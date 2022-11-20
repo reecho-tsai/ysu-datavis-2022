@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Awesome-pyecharts</title>
+    <link rel="stylesheet" href="https://unpkg.com/mdui@1.0.2/dist/css/mdui.min.css" />
+    <script src="https://unpkg.com/mdui@1.0.2/dist/js/mdui.min.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.0.0/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="https://assets.pyecharts.org/assets/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+    <!--导入Chart-->
+    <link rel="stylesheet" type="text/css" href="../css/1.css" />
+
+
+</head>
+
+<body style="background-color: rgb(181, 255, 250);">
+    <div id="container">
+        <div id="header" style="height:50px; background-color: blue; margin-bottom: 8px;">
+
+        </div>
+        <div id="nav" style="height:80px;  background-color: #ccffcc; margin-bottom: 8px;">
+            <span style="float:right;"><i class="mdui-icon material-icons" style="font-size: 80px;">&#xe14f;</i> <label for="">DESKTOP-5GTCQEM</label> </span>
+        </div>
+        <div id="maincontent">
+
+            <div id="side" style="float: left;width:190px; height: 600px; background-color: #ffcc99;">
+
+                <div><button class=".btn" style="width:150px;height: 80px;position: relative;top:20px;left: 20px ;">CPU</button></div>
+                <div><button style="width:150px;height: 80px;position: relative;top:50px;left: 20px ;background-color: aqua;">内存</button></div>
+                <div><button style="width:150px;height: 80px;position: relative;top:80px;left: 20px ;"onclick="window.location.href='index.html'">磁盘</button></div>
+                <div><button style="width:150px;height: 80px;position: relative;top:110px;left: 20px ;"onclick="window.location.href='network.html'" >网络</button>
+                </div>
+            </div>
+
+            <div id="main" style="float: left;width:1130px; height: 600px; background-color: #ffff99;">
+
+                <canvas id="panel" height="600px" width="1130px"> </canvas>
+            </div>
+            <div id="side01" style="float: right;width:190px; height: 600px; background-color: #ffcc99;">
+                <label for="">错误信息</label>
+
+            </div>
+        </div>
+        <div id="" class="clearfloat">
+          
+        </div>
+
+    </div>
+
+
+        <!--本段是折线图，展示内存占用率-->
+        <script>
+            var chartDom = document.getElementById('panel');
+            var myChart = echarts.init(chartDom);
+            var option;
+            var tNow = [], avail = [], Committed = [], Limit = [], Usage = [];
+    
+            option = {
+                backgroundColor: "#ffffff",
+                title: {
+                    text: "内存信息",
+                    textStyle: {
+                        fontWeight: "normal",
+                        fontSize: 16,
+                        color: "#F1F1F3",
+                    },
+                    left: "6%",
+                },
+                tooltip: {
+                    trigger: "axis",
+                    axisPointer: {
+                        lineStyle: {
+                            color: "#57617B",
+                        },
+                    },
+                },
+                legend: {
+                    icon: "rect",
+                    itemWidth: 14,
+                    itemHeight: 5,
+                    itemGap: 13,
+                    data: ["可用空间", "已用空间", "总容量", "使用率"],
+                    right: "4%",
+                    textStyle: {
+                        fontSize: 12,
+                        color: "#F1F1F3",
+                    },
+                },
+                grid: {
+                    left: "3%",
+                    right: "4%",
+                    bottom: "3%",
+                    containLabel: true,
+                },
+                xAxis: [
+                    {
+                        type: "category",
+                        boundaryGap: false,
+                        axisLine: {
+                            lineStyle: {
+                                color: "#57617B",
+                            },
+                        },
+                        data: tNow,
+                    }
+                ],
+                dataZoom: [
+                    {
+                        type: "slider",
+                        xAxisIndex: 0,
+                        filterMode: "empty",
+                        start: 0,
+                        end: 100,
+                    },
+                    {
+                        type: "slider",
+                        yAxisIndex: 0,
+                        filterMode: "empty",
+                        start: 0,
+                        end: 100,
+                    },
+                    {
+                        type: "inside",
+                        xAxisIndex: 0,
+                        filterMode: "empty",
+                        start: 0,
+                        end: 100,
+                    },
+                    {
+                        type: "inside",
+                        yAxisIndex: 0,
+                        filterMode: "empty",
+                        start: 0,
+                        end: 100,
+                    },
+                ],
+                yAxis: [
+                    {
+                        type: "value",
+                        name: "单位（G）",
+                        axisTick: {
+                            show: false,
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: "#57617B",
+                            },
+                        },
+                        axisLabel: {
+                            formatter: "{value} G",
+                            margin: 10,
+                            textStyle: {
+                                fontSize: 14,
+                            },
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                color: "#57617B",
+                            },
+                        },
+                    },
+                    {
+                        type: "value",
+                        name: "利用率（%）",
+                        max: 100,//最大值
+                        min: 0,//最小值
+                        interval: 20,//间隔
+                        axisTick: {
+                            show: false,
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: "#57617B",
+                            },
+                        },
+                        axisLabel: {
+                            formatter: "{value} %",
+                            margin: 10,
+                            textStyle: {
+                                fontSize: 14,
+                            },
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                color: "#57617B",
+                            },
+                        },
+                    },
+                ],
+                series: [
+                    {
+                        name: "可用空间",
+                        type: "line",
+                        smooth: true,
+                        symbol: "circle",
+                        symbolSize: 5,
+                        showSymbol: false,
+                        lineStyle: {
+                            normal: {
+                                width: 1,
+                            },
+                        },
+                        areaStyle: {
+                            normal: {
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1,
+                                    [
+                                        {
+                                            offset: 0,
+                                            color: "rgba(137, 189, 27, 0.3)",
+                                        },
+                                        {
+                                            offset: 0.8,
+                                            color: "rgba(137, 189, 27, 0)",
+                                        },
+                                    ],
+                                    false
+                                ),
+                                shadowColor: "rgba(0, 0, 0, 0.1)",
+                                shadowBlur: 10,
+                            },
+                        },
+                        itemStyle: {
+                            normal: {
+                                color: "rgb(137,189,27)",
+                                borderColor: "rgba(137,189,2,0.27)",
+                                borderWidth: 12,
+                            },
+                        },
+                        data: avail,
+                    },
+                    {
+                        name: "已用空间",
+                        type: "line",
+                        smooth: true,
+                        symbol: "circle",
+                        symbolSize: 5,
+                        showSymbol: false,
+                        lineStyle: {
+                            normal: {
+                                width: 1,
+                            },
+                        },
+                        areaStyle: {
+                            normal: {
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1,
+                                    [
+                                        {
+                                            offset: 0,
+                                            color: "rgba(0, 136, 212, 0.3)",
+                                        },
+                                        {
+                                            offset: 0.8,
+                                            color: "rgba(0, 136, 212, 0)",
+                                        },
+                                    ],
+                                    false
+                                ),
+                                shadowColor: "rgba(0, 0, 0, 0.1)",
+                                shadowBlur: 10,
+                            },
+                        },
+                        itemStyle: {
+                            normal: {
+                                color: "rgb(0,136,212)",
+                                borderColor: "rgba(0,136,212,0.2)",
+                                borderWidth: 12,
+                            },
+                        },
+                        data: Committed,
+                    },
+                    {
+                        name: "总容量",
+                        type: "line",
+                        smooth: true,
+                        symbol: "circle",
+                        symbolSize: 5,
+                        showSymbol: false,
+                        lineStyle: {
+                            normal: {
+                                width: 1,
+                            },
+                        },
+                        areaStyle: {
+                            normal: {
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1,
+                                    [
+                                        {
+                                            offset: 0,
+                                            color: "rgba(219, 50, 51, 0.3)",
+                                        },
+                                        {
+                                            offset: 0.8,
+                                            color: "rgba(219, 50, 51, 0)",
+                                        },
+                                    ],
+                                    false
+                                ),
+                                shadowColor: "rgba(0, 0, 0, 0.1)",
+                                shadowBlur: 10,
+                            },
+                        },
+                        itemStyle: {
+                            normal: {
+                                color: "rgb(219,50,51)",
+                                borderColor: "rgba(219,50,51,0.2)",
+                                borderWidth: 12,
+                            },
+                        },
+                        data: Limit,
+                    },
+                    {
+                        name: "使用率",
+                        type: "line",
+                        yAxisIndex: 1,
+                        smooth: true,
+                        symbol: "circle",
+                        symbolSize: 5,
+                        showSymbol: false,
+                        lineStyle: {
+                            normal: {
+                                width: 8,
+                                color: {
+                                    type: "linear",
+                                    colorStops: [
+                                        {
+                                            offset: 0,
+                                            color: "#A9F387", // 0% 处的颜色
+                                        },
+                                        {
+                                            offset: 1,
+                                            color: "#48D8BF", // 100% 处的颜色
+                                        },
+                                    ],
+                                    globalCoord: false, // 缺省为 false
+                                },
+                                shadowColor: "rgba(72,216,191, 0.3)",
+                                shadowBlur: 10,
+                                shadowOffsetY: 20,
+                            },
+                        },
+                        itemStyle: {
+                            normal: {
+                                color: "#fff",
+                                borderWidth: 10,
+                                shadowColor: 'rgba(72,216,191, 0.3)',
+                                shadowBlur: 100,
+                                borderColor: "#A9F387",
+                            },
+                        },
+                        data: Usage,
+                    },
+                ],
+            };
+    
+            $(
+                function () {
+                    initData();
+                    setInterval(getDynamicData, 1000);
+                }
+            );
+            //判定总长度并删除过长的部分
+            function removeData() {
+                if (tNow.length > 15) {
+                    tNow.shift();
+                    avail.shift();
+                    Committed.shift();
+                    Limit.shift();
+                    Usage.shift();
+                }
+            }
+            //初始化数据
+            function initData() {
+                for (var i = 0; i < 15; i++) {
+                    $.ajax({
+                        type: "GET",
+                        url: "http://127.0.0.1:5000/MemoryUsageThree",
+                        dataType: "json",
+                        success: function (result) {
+                            tNow.push(result.tNow);//将新值更新到数组后面
+                            avail.push(result.avail);//
+                            Committed.push(result.Committed);//
+                            Limit.push(result.Limit);//
+                            Usage.push(result.Usage);
+                        }
+                    });
+                }
+            }
+            //更新函数
+            function getDynamicData() {
+                $.ajax({
+                    type: "GET",
+                    url: "http://127.0.0.1:5000/MemoryUsageThree",
+                    dataType: "json",
+                    success: function (result) {
+                        tNow.push(result.tNow);//将新值更新到数组后面
+                        avail.push(result.avail);//
+                        Committed.push(result.Committed);//
+                        Limit.push(result.Limit);//
+                        Usage.push(result.Usage);
+                        removeData();
+                        myChart.setOption(option);
+                    }
+                });
+            }
+    
+            option && myChart.setOption(option);
+    
+        </script>
+
+</body>
+
+</html>

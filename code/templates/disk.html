@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-cmn-Hans">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" />
+    <meta name="renderer" content="webkit" />
+    <meta name="force-rendering" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+    <!-- MDUI CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/mdui@1.0.2/dist/css/mdui.min.css" />
+    <script src="../js/echarts4_8_0.min.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.0.0/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="https://assets.pyecharts.org/assets/echarts.min.js"></script>
+
+    <script type="text/javascript" src="https://assets.pyecharts.org/assets/echarts-liquidfill.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+
+    <script>
+        $(function () {
+            var can = $('#panel').get(0).getContext('2d'); /*绘制类型*/
+            //定义图标的数据
+            var canData = {
+
+                labels: [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "], /*初始x轴数据*/
+                datasets: [
+                    {
+
+                        label: "% disk Time",
+                        //折线的填充颜色
+                        fillColor: "rgba(0, 136, 212, 0.3)",
+                        //线条颜色：
+                        strokeColor: "white",
+                        //y轴初始数据：
+                        data: ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0']
+
+                    }
+
+                ]
+
+            };
+
+
+            let myChart = new Chart(can, {
+                type: 'line',
+                data: {
+                    labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+                    datasets: [{
+                        label: '# of Votes',
+                        fill: true,//默认填充，不设置也可以
+                        data: [12, 20, 12, 5, 2, 3],
+
+
+                        borderWidth: 1
+                    }]
+                },
+
+            });
+
+            //绘制图片
+            var line = new Chart(can).Line(canData);
+            var int = setInterval(function () {  //设置定时器
+                $.ajax(
+                    {
+                        url: "/diskData/", //从diskData函数中获取数据
+                        type: "get",
+                        data: "",
+                        success: function (data) {
+                            line.addData(
+                                [data["data"]], //y轴，因为同一个x轴可以有多个折线
+                                data["time"]  //x轴
+                            );
+                            //保持x轴只有8个数据，要不随着时间推移x轴会越来越长
+                            var len = line.datasets[0].points.length;
+                            if (len > 20) {
+                                line.removeData()
+                            }
+                        }
+                    }
+                )
+            }, 1000)
+        })
+    </script>
+    <script>
+        $(function () {
+            var can2 = $('#panel2').get(0).getContext('2d'); /*绘制类型*/
+            //定义图标的数据
+            var canData2 = {
+                labels: [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "], /*初始x轴数据*/
+                datasets: [
+                    {
+                        //折线的填充颜色
+                        fillColor: "rgba(100, 0, 150, 0.3)",
+                        //线条颜色：
+                        strokeColor: "white",
+                        //y轴初始数据：
+                        data: ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0']
+
+                    }
+
+                ]
+
+            };
+
+            //绘制图片
+            var line2 = new Chart(can2).Line(canData2);
+            var int2 = setInterval(function () {  //设置定时器
+                $.ajax(
+                    {
+                        url: "/diskData1/", //从diskData函数中获取数据
+                        type: "get",
+                        data: "",
+                        success: function (data) {
+                            line2.addData(
+                                [data["data"]], //y轴，因为同一个x轴可以有多个折线
+                                data["time"]  //x轴
+                            );
+                            console.log(data["data"]);
+                            //保持x轴只有8个数据，要不随着时间推移x轴会越来越长
+                            var len = line2.datasets[0].points.length;
+                            if (len > 20) {
+                                line2.removeData()
+                            }
+                        }
+                    }
+                )
+            }, 1000)
+        })
+    </script>
+    <title>Hello, world!</title>
+</head>
+
+<body class="mdui-theme-primary-indigo mdui-drawer-body-left mdui-appbar-with-toolbar">
+    <header class="mdui-appbar mdui-appbar-fixed">
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="javascript:;" class="mdui-btn mdui-btn-icon">
+                <i class="mdui-icon material-icons">menu</i>
+            </a>
+            <a href="javascript:;" class="mdui-typo-headline">性能监视器</a>
+            <a href="javascript:;" class="mdui-typo-title">Disk</a>
+            <div class="mdui-toolbar-spacer"></div>
+            <a href="javascript:;" class="mdui-btn mdui-btn-icon">
+                <i class="mdui-icon material-icons">search</i>
+            </a>
+            <a href="javascript:;" class="mdui-btn mdui-btn-icon">
+                <i class="mdui-icon material-icons">refresh</i>
+            </a>
+            <a href="javascript:;" class="mdui-btn mdui-btn-icon">
+                <i class="mdui-icon material-icons">more_vert</i>
+            </a>
+        </div>
+    </header>
+    <div class="mdui-drawer">
+        <ul class="mdui-list">
+            <a class="mdui-list-item mdui-ripple" href="cpu">
+                <i class="mdui-list-item-icon mdui-icon material-icons">blur_circular</i>
+                <div class="mdui-list-item-content">CPU</div>
+            </a>
+
+            <a class="mdui-list-item mdui-ripple" href="memory">
+                <i class="mdui-list-item-icon mdui-icon material-icons">memory</i>
+                <div class="mdui-list-item-content">Memory</div>
+            </a>
+
+            <a class="mdui-list-item mdui-ripple" href="disk">
+
+                <i class="mdui-list-item-icon mdui-icon material-icons">sd_storage</i>
+                <div class="mdui-list-item-content">Disk</div>
+            </a>
+
+            <a class="mdui-list-item mdui-ripple" href="network">
+                <i class="mdui-list-item-icon mdui-icon material-icons">network_check</i>
+                <div class="mdui-list-item-content">Network</div>
+            </a>
+        </ul>
+    </div>
+    <div class="mdui-container">
+
+        <div class="mdui-row">
+            <!--
+              
+            <canvas height="300px" width="500px"> </canvas>
+             <canvas id="panel2" height="300px" width="500px"> </canvas> 
+            -->
+
+            
+
+           
+            <div style="width:50%; height:500px;" class="mdui-col-xs-6">
+                <h3>% Disk Time</h3> 
+                <canvas id="panel" height="300px" width="500px">
+                </canvas>
+            </div>
+            <div style="width:50%; height:500px;" class="mdui-col-xs-6">
+                <h3>Avg. Disk sec/Transfer</h3>
+
+                <canvas id="panel2" height="300px" width="500px">
+                </canvas>
+            </div>
+        </div>
+
+
+
+    </div>
+    <!-- MDUI JavaScript -->
+    <script src="https://unpkg.com/mdui@1.0.2/dist/js/mdui.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>MemInfo</title>
+    <script src="https://cdn.bootcss.com/jquery/3.0.0/jquery.min.js"></script>
+    <script type="text/javascript" src="https://assets.pyecharts.org/assets/echarts.min.js"></script>
+    <!--<script src="./js/echarts.js"></script>-->
+    <<script type="text/javascript" src="https://assets.pyecharts.org/assets/echarts-liquidfill.min.js"></script>
+        <!--回滚更新使用js-->
+        <!-- <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script> -->
+        <!--导入jQuery-->
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script> -->
+        <!--导入jQuery-->
+
+</head>
+
+<body>
+    <div id="liquid" style="width:1000px; height:600px;"></div>
+    <!--  回滚更新使用  -->
+    <!-- <canvas id="panel" height="600px" width="1000px"> </canvas> -->
+    <!--折线图位置-->
+    <!--增量更新使用-->
+    <div id="bar" style="width:1000px; height:600px;"></div>
+
+    <!--本段是球图，实时展示内存占用率-->
+    <script>
+        var chart1 = echarts.init(document.getElementById('liquid'), 'white', { renderer: 'canvas' });
+
+        $(
+            function () {
+                fetchLiquidData(chart1);
+                setInterval(fetchLiquidData, 1000);
+            }
+        );
+
+        function fetchLiquidData() {
+            $.ajax({
+                type: "GET",
+                url: "http://127.0.0.1:5000/MemoryUsage",
+                dataType: 'json',
+                success: function (result) {
+                    chart1.setOption(result);
+                }
+            });
+        }
+    </script>
+
+    <!--本段是折线图，增量展示内存占用率-->
+    <script>
+        var chartDom = document.getElementById('bar');
+        var myChart = echarts.init(chartDom);
+        var option;
+        var tNow = [], avail = [], Committed = [], Limit = [];
+
+        option = {
+            backgroundColor: "#394056",
+            title: {
+                text: "内存信息",
+                textStyle: {
+                    fontWeight: "normal",
+                    fontSize: 16,
+                    color: "#F1F1F3",
+                },
+                left: "6%",
+            },
+            tooltip: {
+                trigger: "axis",
+                axisPointer: {
+                    lineStyle: {
+                        color: "#57617B",
+                    },
+                },
+            },
+            legend: {
+                icon: "rect",
+                itemWidth: 14,
+                itemHeight: 5,
+                itemGap: 13,
+                data: ["可用空间", "已用空间", "总容量"],
+                right: "4%",
+                textStyle: {
+                    fontSize: 12,
+                    color: "#F1F1F3",
+                },
+            },
+            grid: {
+                left: "3%",
+                right: "4%",
+                bottom: "3%",
+                containLabel: true,
+            },
+            xAxis: [
+                {
+                    type: "category",
+                    boundaryGap: false,
+                    axisLine: {
+                        lineStyle: {
+                            color: "#57617B",
+                        },
+                    },
+                    data: tNow,
+                }
+            ],
+            yAxis: [
+                {
+                    type: "value",
+                    name: "单位（G）",
+                    axisTick: {
+                        show: false,
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: "#57617B",
+                        },
+                    },
+                    axisLabel: {
+                        formatter: "{value} G",
+                        margin: 10,
+                        textStyle: {
+                            fontSize: 14,
+                        },
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: "#57617B",
+                        },
+                    },
+                },
+            ],
+            series: [
+                {
+                    name: "可用空间",
+                    type: "line",
+                    smooth: true,
+                    symbol: "circle",
+                    symbolSize: 5,
+                    showSymbol: false,
+                    lineStyle: {
+                        normal: {
+                            width: 1,
+                        },
+                    },
+                    areaStyle: {
+                        normal: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1,
+                                [
+                                    {
+                                        offset: 0,
+                                        color: "rgba(137, 189, 27, 0.3)",
+                                    },
+                                    {
+                                        offset: 0.8,
+                                        color: "rgba(137, 189, 27, 0)",
+                                    },
+                                ],
+                                false
+                            ),
+                            shadowColor: "rgba(0, 0, 0, 0.1)",
+                            shadowBlur: 10,
+                        },
+                    },
+                    itemStyle: {
+                        normal: {
+                            color: "rgb(137,189,27)",
+                            borderColor: "rgba(137,189,2,0.27)",
+                            borderWidth: 12,
+                        },
+                    },
+                    data: avail,
+                },
+                {
+                    name: "已用空间",
+                    type: "line",
+                    smooth: true,
+                    symbol: "circle",
+                    symbolSize: 5,
+                    showSymbol: false,
+                    lineStyle: {
+                        normal: {
+                            width: 1,
+                        },
+                    },
+                    areaStyle: {
+                        normal: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1,
+                                [
+                                    {
+                                        offset: 0,
+                                        color: "rgba(0, 136, 212, 0.3)",
+                                    },
+                                    {
+                                        offset: 0.8,
+                                        color: "rgba(0, 136, 212, 0)",
+                                    },
+                                ],
+                                false
+                            ),
+                            shadowColor: "rgba(0, 0, 0, 0.1)",
+                            shadowBlur: 10,
+                        },
+                    },
+                    itemStyle: {
+                        normal: {
+                            color: "rgb(0,136,212)",
+                            borderColor: "rgba(0,136,212,0.2)",
+                            borderWidth: 12,
+                        },
+                    },
+                    data: Committed,
+                },
+                {
+                    name: "总容量",
+                    type: "line",
+                    smooth: true,
+                    symbol: "circle",
+                    symbolSize: 5,
+                    showSymbol: false,
+                    lineStyle: {
+                        normal: {
+                            width: 1,
+                        },
+                    },
+                    areaStyle: {
+                        normal: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1,
+                                [
+                                    {
+                                        offset: 0,
+                                        color: "rgba(219, 50, 51, 0.3)",
+                                    },
+                                    {
+                                        offset: 0.8,
+                                        color: "rgba(219, 50, 51, 0)",
+                                    },
+                                ],
+                                false
+                            ),
+                            shadowColor: "rgba(0, 0, 0, 0.1)",
+                            shadowBlur: 10,
+                        },
+                    },
+                    itemStyle: {
+                        normal: {
+                            color: "rgb(219,50,51)",
+                            borderColor: "rgba(219,50,51,0.2)",
+                            borderWidth: 12,
+                        },
+                    },
+                    data: Limit,
+                },
+            ],
+        };
+
+        $(
+            function () {
+                initData();
+                setInterval(getDynamicData, 1000);
+            }
+        );
+
+        function removeData() {
+            if (tNow.length > 15) {
+                tNow.shift();
+                avail.shift();
+                Committed.shift();
+                Limit.shift();
+            }
+        }
+        function initData() {
+            for (var i = 0; i < 15; i++) {
+                $.ajax({
+                    type: "GET",
+                    url: "http://127.0.0.1:5000/MemoryUsageThree",
+                    dataType: "json",
+                    success: function (result) {
+                        tNow.push(result.tNow);//将新值更新到数组后面
+                        avail.push(result.avail);//
+                        Committed.push(result.Committed);//
+                        Limit.push(result.Limit);//
+                    }
+                });
+            }
+        }
+
+        function getDynamicData() {
+            $.ajax({
+                type: "GET",
+                url: "http://127.0.0.1:5000/MemoryUsageThree",
+                dataType: "json",
+                success: function (result) {
+                    tNow.push(result.tNow);//将新值更新到数组后面
+                    avail.push(result.avail);//
+                    Committed.push(result.Committed);//
+                    Limit.push(result.Limit);//
+                    removeData();
+                    myChart.setOption(option);
+                }
+            });
+        }
+
+        option && myChart.setOption(option);
+
+    </script>
+
+
+
+    <!--本段是折线图，增量展示内存占用率-->
+    <!--<script>
+        var chart = echarts.init(document.getElementById('bar'), 'white', { renderer: 'canvas' });
+        var old_data = [];
+        $(
+            function () {
+                fetchBarData(chart);
+                setInterval(getDynamicData, 1000);
+            }
+        );
+
+        function fetchBarData() {
+            $.ajax({
+                type: "GET",
+                url: "http://127.0.0.1:5000/MemoryUsageLine",
+                dataType: "json",
+                success: function (result) {
+                    chart.setOption(result);
+                    old_data = chart.getOption().series[0].data;
+                }
+            });
+        }
+
+        function getDynamicData() {
+            $.ajax({
+                type: "GET",
+                url: "http://127.0.0.1:5000/MemoryUsageData",
+                dataType: "json",
+                success: function (result) {
+                    old_data.push([result.name, result.value]);//将新值更新到数组后面
+                    chart.setOption({
+                        series: [{ data: old_data }]
+                    });
+                }
+            });
+        }
+    </script>
+    -->
+
+    <!--本段是折线图，回滚更新展示内存占用率-->
+    <!--
+    <script>
+        $(
+            function () {
+                var can = $('#panel').get(0).getContext('2d'); /*绘制类型*/
+                //定义图标的数据
+                var canData = {
+                    labels: [0, 0], /*初始x轴数据*/
+                    datasets: [
+                        {
+                            //折线的填充颜色
+                            fillColor: "rgba(255,255,255,0.1)",
+                            //线条颜色：
+                            strokeColor: "rgba(255,255,0,1)",
+                            //y轴初始数据：
+                            data: [0, 0]
+                        }
+                    ]
+                };
+                //绘制图片
+                var line = new Chart(can).Line(canData);
+                var int = setInterval(
+                    function () {
+                        $.ajax({
+                            url: "http://127.0.0.1:5000/MemoryUsageTime",
+                            type: "GET",
+                            data: "",
+                            success: function (result) {
+                                time = result['time'];
+                                line.addData(
+                                    [result['data'], //y轴，因为同一个x轴可以有多个折线
+                                    time] //x轴
+                                );
+                                //保持x轴只有10个数据，要不随着时间推移x轴会越来越长
+                                var len = line.datasets[0].points.length;
+                                //var len = line.length;
+
+                                if (len > 10) {
+                                    line.removeData()
+                                }
+                            }
+                        });
+                    }
+                    , 1000);
+            }
+        );
+    </script>-->
+</body>
+
+</html>
